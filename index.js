@@ -10,6 +10,13 @@ app.use(express.json());
 // Serve static files from the "public" directory
 app.use(express.static('public'));
 
+// Set up a basic route for the root URL
+const path = require('path');
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
 // In-memory storage for users and their exercise logs
 // Each user will be stored as { username: String, _id: String, log: Array }
 const users = [];
@@ -161,8 +168,9 @@ app.get("/api/users/:_id/logs", (req, res) => {
     log: formattedLog
   });
 });
-
+ 
 // Start the server
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
+
