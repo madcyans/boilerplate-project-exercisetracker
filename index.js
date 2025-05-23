@@ -7,6 +7,9 @@ app.use(cors())
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Serve static files from the "public" directory
+app.use(express.static('public'));
+
 // In-memory storage for users and their exercise logs
 // Each user will be stored as { username: String, _id: String, log: Array }
 const users = [];
@@ -16,10 +19,13 @@ const generateId = () => {
   return Math.random().toString(36).substr(2, 9);
 };
 
+/* ===== API Endpoints ===== */
+
+// Create a new user
+// POST /api/users with form data: username
+// Returns an object with username and _id properties
+
 // Root route – now GET "/" will not produce an error
-app.get('/', (req, res) => {
-  res.send("Welcome to the Exercise Tracker API!");
-});
 
 // POST /api/users – Create a new user
 app.post('/api/users', (req, res) =>{
@@ -55,6 +61,11 @@ app.get("/api/users", (req, res) => {
   res.json(simplifiedUsers);
 });
 
+// Add an exercise for a user
+// POST /api/users/:_id/exercises with form data: description, duration, and optionally date
+// If no date is supplied, the current date is used.
+// Returns the user object with the exercise fields added.
+
 // 3. POST /api/users/:_id/exercises - Add an exercise to a user
 app.post("/api/users/:_id/exercises", (req, res) => {
   const userId = req.params._id;
@@ -73,14 +84,9 @@ app.post("/api/users/:_id/exercises", (req, res) => {
   const durationNum = parseInt(duration);
 
   // If date is provided, use it; otherwise, default to the current date
-  let exerciseDate;
-  if (date) {
-    exerciseDate = new Date(date);
-    if (exerciseDate.toString() === "Invalid Date") {
-      return res.status(400).json({ error: "Invalid date format" });
-    }
-  } else {
-    exerciseDate = new Date();
+  let exerciseDate = date ? new Date(date) : new Date();
+  if (exerciseDate.toString() === 'Invalid Date') {
+    return res.status(400).json({ error: 'Invalid date format' });
   }
 
   const exercise = {
@@ -99,6 +105,11 @@ app.post("/api/users/:_id/exercises", (req, res) => {
     date: exercise.date.toDateString()
   });
 });
+
+// Retrieve a user's exercise log
+// GET /api/users/:_id/logs returns an object with username, count, _id and log array.
+// Each log item is an object with description (string), duration (number), and date (string in Date.toDateString() format).
+// Optional query parameters: from, to (dates in yyyy-mm-dd format); limit (integer).
 
 // 4. GET /api/users/:_id/logs - Retrieve a user's exercise log
 app.get("/api/users/:_id/logs", (req, res) => {
@@ -151,6 +162,7 @@ app.get("/api/users/:_id/logs", (req, res) => {
   });
 });
 
+// Start the server
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
