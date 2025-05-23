@@ -16,7 +16,12 @@ const generateId = () => {
   return Math.random().toString(36).substr(2, 9);
 };
 
-// Your first API endpoint
+// Root route – now GET "/" will not produce an error
+app.get('/', (req, res) => {
+  res.send("Welcome to the Exercise Tracker API!");
+});
+
+// POST /api/users – Create a new user
 app.post('/api/users', (req, res) =>{
   const username = req.body.username;
   
@@ -40,26 +45,6 @@ app.post('/api/users', (req, res) =>{
   res.json({ username: newUser.username, _id: newUser._id });
 });
 
-app.get('/api/users', function(req, res) {
-  const users = [
-    {username: 'user1', _id: '1'},
-    {username: 'user2', _id: '2'},
-    {username: 'user3', _id: '3'}
-  ];
-  res.json(users); 
-});
-
-app.post('/api/users/:_id/exercises', function(req, res) {
-  const { _id } = req.params;
-  const { description, duration, date } = req.body;
-  const exercise = {
-    _id,
-    description,
-    duration,
-    date: date ? new Date(date) : new Date()
-  };
-  res.json(exercise);
-});
 // 2. GET /api/users - Retrieve a list of all users
 app.get("/api/users", (req, res) => {
   // Only return the username and _id for each user
